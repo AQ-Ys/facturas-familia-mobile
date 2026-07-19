@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-only overlay: allows cleartext HTTP to the local dev server hosts
+     (see res/xml/network_security_config.xml in this source set). Release
+     builds never see this file. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:networkSecurityConfig="@xml/network_security_config"
+        tools:targetApi="28" />
+</manifest>

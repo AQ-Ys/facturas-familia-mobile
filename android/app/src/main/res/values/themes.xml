@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand colors match the web's design tokens (native.css / index.css). -->
+    <style name="Theme.FacturasFamilia" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/brand_action</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="android:statusBarColor">@color/brand_primary</item>
+        <item name="android:windowBackground">@color/brand_bg</item>
+    </style>
+</resources>
