@@ -108,7 +108,33 @@ publicar una versión nueva de la app. Sin permiso CAMERA (misma filosofía
 que la captura de fotos). Verificado E2E en emulador: QR con CUFE real →
 galería → decodificado → factura correcta detectada como duplicada.
 
+## iOS sin Mac (Fase 4, 2026-07-19)
+
+`ios/` contiene la app iOS (Swift, HotwireNative 1.3.0 — APIs verificadas
+contra el código fuente del tag exacto, no contra docs). **No hay Mac en el
+equipo**, así que el `.xcodeproj` nunca se edita a mano: se genera con
+[XcodeGen](https://github.com/yonaskolb/XcodeGen) desde `ios/project.yml`, y
+la compilación + smoke test corren en **GitHub Actions (runner macOS)** —
+ver `.github/workflows/ios-build.yml`:
+
+1. `xcodegen generate` → `xcodebuild` para el simulador **sin firma** (los
+   builds de simulador no requieren cuenta Apple).
+2. Arranca un simulador iPhone, instala la app, la lanza, verifica que el
+   proceso siga vivo y sube un screenshot como artefacto (sin servidor en CI
+   la app muestra la pantalla de error de Hotwire — eso igual prueba que el
+   shell, la librería y el path configuration inicializan sin crashear).
+
+Desarrollo local iOS: el **simulador** llega al `rails server` del host por
+`localhost:3000` directamente (a diferencia de Android/10.0.2.2). ATS queda
+en HTTPS-only con la única excepción `NSAllowsLocalNetworking` (localhost) —
+ningún HTTP arbitrario, alineado con `force_ssl` del backend.
+
+Para dispositivo físico / TestFlight hace falta la cuenta Apple Developer
+($99/año — el Agreement ya está en Descargas) + certificados; se cablea en
+el mismo workflow cuando exista.
+
 ## Pendiente (fases siguientes)
 
-- iOS (requiere Mac/Xcode — bloqueado en esta máquina Windows).
-- Ícono/splash de marca reales y firma de release para Play Store.
+- Bridge components de cámara/QR en iOS (hoy solo Android; la web oculta
+  esos botones en iOS automáticamente por el user agent).
+- Ícono/splash de marca reales; firma release (Play Store / App Store).
