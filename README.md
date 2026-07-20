@@ -129,9 +129,18 @@ Desarrollo local iOS: el **simulador** llega al `rails server` del host por
 en HTTPS-only con la única excepción `NSAllowsLocalNetworking` (localhost) —
 ningún HTTP arbitrario, alineado con `force_ssl` del backend.
 
-Para dispositivo físico / TestFlight hace falta la cuenta Apple Developer
-($99/año — el Agreement ya está en Descargas) + certificados; se cablea en
-el mismo workflow cuando exista.
+**Primer build verde: run 29712401383** (2026-07-19) — compiló, pasó el
+smoke de simulador (app viva + screenshot) y produjo el artefacto
+`FacturasFamilia-unsigned.ipa` (build Debug para iPhone real, arm64, sin
+firmar). Para instalarlo en un iPhone físico desde Windows: descargar el
+.ipa del run → firmarlo e instalarlo con Sideloadly usando un Apple ID
+gratuito (validez 7 días, renovable). Distribución permanente: Apple
+Developer $99/año + TestFlight; se cablea en el mismo workflow cuando
+exista la cuenta.
+
+Nota ATS: el build Debug usa `Info-Debug.plist` (permite HTTP hacia la LAN
+para pruebas); Release usa `Info.plist` estricto HTTPS-only — la excepción
+jamás llega a producción.
 
 ## Pendiente (fases siguientes)
 
