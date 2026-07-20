@@ -1,16 +1,16 @@
 import Foundation
 
 /// Server endpoints per build configuration.
-/// - Debug: the iOS SIMULATOR reaches the host machine's `rails server`
-///   directly via localhost (unlike Android's 10.0.2.2 alias). A physical
-///   iPhone on the LAN needs the host's IP + `rails server -b 0.0.0.0`,
-///   and an ATS exception — deliberately NOT configured: use HTTPS or the
-///   simulator for development.
+/// - Debug: the dev machine's LAN IP — reachable BOTH from the iOS
+///   simulator (it shares the host network) and from a physical iPhone on
+///   the same Wi-Fi. The Rails server must listen on all interfaces
+///   (`rails server -b 0.0.0.0`). Update the IP here if the dev machine's
+///   address changes (hoy: 192.168.18.12).
 /// - Release: HTTPS-only production placeholder (ATS enforces TLS).
 enum AppConfig {
     static var baseURL: URL {
         #if DEBUG
-        URL(string: "http://localhost:3000")!
+        URL(string: "http://192.168.18.12:3000")!
         #else
         URL(string: "https://api.facturasfamilia.com")!
         #endif

@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     runs-on: macos-15
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - name: Install XcodeGen
@@ -20,3 +20,43 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild build -project FacturasFamilia.xcodeproj -scheme FacturasFamilia -destination 'generic/platform=iOS Simulator' -configuration Debug CODE_SIGNING_ALLOWED=NO | tail -40
+      - name: Simulator smoke test
+        working-directory: ios
+        run: |
+          set -euxo pipefail
+          UDID=$(xcrun simctl list devices available iPhone | grep -oE '[A-F0-9-]{36}' | head -1)
+          test -n "$UDID"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -type d -name "FacturasFamilia.app" -path "*iphonesimulator*" | head -1)
+          test -n "$APP_PATH"
+          xcrun simctl install "$UDID" "$APP_PATH"
+          xcrun simctl launch "$UDID" com.facturasfamilia.app
+          sleep 12
+          xcrun simctl io "$UDID" screenshot smoke.png
+          xcrun simctl spawn "$UDID" launchctl list | grep -q "com.facturasfamilia.app"
+      - name: Build device (arm64) unsigned
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild build -project FacturasFamilia.xcodeproj -scheme FacturasFamilia -destination 'generic/platform=iOS' -configuration Debug CODE_SIGNING_ALLOWED=NO | tail -40
+      - name: Package unsigned IPA
+        working-directory: ios
+        run: |
+          set -euxo pipefail
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -type d -name "FacturasFamilia.app" -path "*iphoneos*" | head -1)
+          test -n "$APP_PATH"
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/
+          zip -qry FacturasFamilia-unsigned.ipa Payload
+          ls -la FacturasFamilia-unsigned.ipa
+      - name: Upload smoke screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulator-smoke
+          path: ios/smoke.png
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: FacturasFamilia-unsigned-ipa
+          path: ios/FacturasFamilia-unsigned.ipa

@@ -7,7 +7,6 @@ options:
   bundleIdPrefix: com.facturasfamilia
   deploymentTarget:
     iOS: "15.0"
-  xcodeVersion: "16.0"
 
 packages:
   HotwireNative:
@@ -24,24 +23,6 @@ targets:
         buildPhase: resources
     dependencies:
       - package: HotwireNative
-    info:
-      path: Info.plist
-      properties:
-        CFBundleDisplayName: Facturas Familia
-        UILaunchScreen: {}
-        UIApplicationSceneManifest:
-          UIApplicationSupportsMultipleScenes: false
-          UISceneConfigurations:
-            UIWindowSceneSessionRoleApplication:
-              - UISceneConfigurationName: Default Configuration
-                UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).SceneController
-        # App Transport Security: HTTPS-only, with ONLY the local-networking
-        # relaxation (localhost / .local) for development against the local
-        # Rails server. Arbitrary cleartext HTTP remains blocked in every
-        # build — aligned with the backend's force_ssl and encryption-in-
-        # transit expectations (Ley 81 Panamá / US state privacy laws).
-        NSAppTransportSecurity:
-          NSAllowsLocalNetworking: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.facturasfamilia.app
@@ -49,9 +30,15 @@ targets:
         CURRENT_PROJECT_VERSION: 1
         SWIFT_VERSION: "5.9"
         TARGETED_DEVICE_FAMILY: "1"
-        # CI builds for the simulator without signing; real-device signing
-        # happens only when an Apple Developer account is wired in.
+        GENERATE_INFOPLIST_FILE: NO
+        # Release plist: HTTPS estricto (sin excepciones ATS).
+        INFOPLIST_FILE: Info.plist
         CODE_SIGN_STYLE: Automatic
+      configs:
+        Debug:
+          # Debug-only: permite HTTP hacia el rails server de la LAN para
+          # pruebas en simulador/iPhone físico. Release NO hereda esto.
+          INFOPLIST_FILE: Info-Debug.plist
 
 schemes:
   FacturasFamilia:
@@ -62,4 +49,3 @@ schemes:
       config: Debug
     archive:
       config: Release
-# CI trigger
