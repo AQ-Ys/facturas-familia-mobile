@@ -50,6 +50,22 @@ jobs:
           cp -R "$APP_PATH" Payload/
           zip -qry FacturasFamilia-unsigned.ipa Payload
           ls -la FacturasFamilia-unsigned.ipa
+      - name: Build RELEASE (arm64) unsigned + ATS production guard
+        working-directory: ios
+        run: |
+          set -euxo pipefail
+          xcodebuild build -project FacturasFamilia.xcodeproj -scheme FacturasFamilia -destination 'generic/platform=iOS' -configuration Release CODE_SIGNING_ALLOWED=NO | tail -20
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -type d -name "FacturasFamilia.app" -path "*Release-iphoneos*" | head -1)
+          test -n "$APP_PATH"
+          # GUARD: el build de PRODUCCIÓN no puede contener excepciones ATS.
+          # Si Info-Debug.plist se filtrara a Release, este paso pone el CI
+          # en rojo — el HTTP-para-LAN es exclusivo de builds de desarrollo
+          # (cifrado en tránsito obligatorio en producción: Ley 81 / EE.UU.).
+          if /usr/libexec/PlistBuddy -c "Print :NSAppTransportSecurity" "$APP_PATH/Info.plist" 2>/dev/null; then
+            echo "FALLO DE SEGURIDAD: el Info.plist de Release contiene NSAppTransportSecurity"
+            exit 1
+          fi
+          echo "OK: Release sin excepciones ATS (HTTPS estricto)"
       - name: Upload smoke screenshot
         uses: actions/upload-artifact@v4
         with:
