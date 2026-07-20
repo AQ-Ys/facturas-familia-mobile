@@ -1,0 +1,22 @@
+name: ios
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "ios/**"
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        working-directory: ios
+        run: xcodegen generate
+      - name: Build simulator unsigned
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild build -project FacturasFamilia.xcodeproj -scheme FacturasFamilia -destination 'generic/platform=iOS Simulator' -configuration Debug CODE_SIGNING_ALLOWED=NO | tail -40
