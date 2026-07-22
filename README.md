@@ -95,18 +95,28 @@ pantalla de revisión saldría vacía) → la web visita el redirect con Turbo.
 El archivo temporal de captura se borra tras subir. El `<input type=file>`
 sigue como fallback universal.
 
-## Bridge Component de escaneo QR (2026-07-19)
+## Bridge Component de escaneo QR (2026-07-19, reescrito 2026-07-22)
 
-`bridge/QrScannerComponent.kt` + `MainActivity.launchImagePick` (pareado con
-`bridge_qr_controller.js`): "📷 Escanear código QR" abre un chooser
-cámara/galería (las facturas suelen llegar como imagen por WhatsApp), el QR
-se decodifica **en el dispositivo** con ML Kit (modelo embebido, offline; la
-imagen nunca sale del teléfono) y el texto crudo se envía por el formulario
-CUFE normal — el servidor (`normalize_cufe`) desenvuelve la URL de consulta
-de la DGI (`FacturasPorQR?chFE=...`), así el formato puede evolucionar sin
-publicar una versión nueva de la app. Sin permiso CAMERA (misma filosofía
-que la captura de fotos). Verificado E2E en emulador: QR con CUFE real →
-galería → decodificado → factura correcta detectada como duplicada.
+`bridge/QrScannerComponent.kt` + `bridge/QrScanActivity.kt` (pareado con
+`bridge_qr_controller.js`): "📷 Escanear código QR" abre un **escáner en
+vivo** (CameraX preview + análisis por frame con ML Kit, modelo embebido,
+offline; la imagen nunca sale del teléfono) con botón de galería como
+fallback (las facturas suelen llegar como imagen por WhatsApp). El texto
+decodificado se envía por el formulario CUFE normal — el servidor
+(`normalize_cufe`) desenvuelve la URL de consulta de la DGI
+(`FacturasPorQR?chFE=...`), así el formato puede evolucionar sin publicar
+una versión nueva de la app.
+
+Historia real de este componente (verificado en un Honor físico): la v1
+usaba una foto única con la cámara del sistema (sin permiso CAMERA), pero
+encuadrar un QR denso de la DGI en una sola foto es casi imposible en la
+práctica. La v2 requiere el permiso CAMERA (solo esta pantalla) y dos
+hallazgos on-device: (1) la resolución default de `ImageAnalysis` (640x480)
+es insuficiente para los QR de la DGI (~3px por módulo, ML Kit nunca
+engancha) — con 1080p decodifica al instante; (2) CameraX 1.6.1 exige
+compileSdk 36. Verificado E2E con una factura física real: escaneo en vivo
+→ consulta DGI → factura guardada con todos los ítems; y re-escaneo
+detectado como duplicado.
 
 ## iOS sin Mac (Fase 4, 2026-07-19)
 
