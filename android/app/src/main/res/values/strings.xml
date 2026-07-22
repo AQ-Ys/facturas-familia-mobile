@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Facturas Familia</string>
+    <string name="qr_scan_hint">Apunta al código QR de la factura</string>
+    <string name="qr_pick_from_gallery">Elegir de la galería</string>
+    <string name="qr_cancel">Cancelar</string>
+    <string name="qr_permission_denied">Sin permiso de cámara no se puede escanear en vivo. Podés elegir una foto de la galería en su lugar.</string>
+    <string name="qr_no_code_found">No se detectó un código QR en esa imagen.</string>
 </resources>

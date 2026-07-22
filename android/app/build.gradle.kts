@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.facturasfamilia.app"
-    compileSdk = 35
+    compileSdk = 36 // bumped for CameraX 1.6.1, which requires SDK 36 to compile against
 
     defaultConfig {
         applicationId = "com.facturasfamilia.app"
@@ -66,4 +66,13 @@ dependencies {
     // model — works offline, nothing leaves the device). Latest per Google
     // Maven metadata, verified 2026-07-19.
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
+    // Live-preview QR scanner (replaces the old take-a-single-photo-then-
+    // decode flow — confirmed on a real device that a static shutter photo
+    // is too unreliable to actually frame a QR correctly). Latest stable
+    // per Google Maven metadata, verified 2026-07-22 (1.7.0 is alpha-only).
+    val cameraxVersion = "1.6.1"
+    implementation("androidx.camera:camera-core:$cameraxVersion")
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
 }

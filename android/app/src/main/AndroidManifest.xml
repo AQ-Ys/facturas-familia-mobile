@@ -3,6 +3,13 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Only for the live QR scanner (CameraX preview + ML Kit live analysis).
+         The photo/receipt capture flow still uses the system camera app via
+         ACTION_IMAGE_CAPTURE and needs no permission — this one is required
+         because the QR scanner owns the camera feed directly instead. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
     <!-- Android 11+ package visibility: without this, resolving/launching the
          system camera via ACTION_IMAGE_CAPTURE is silently BLOCKED (seen as
          an AppsFilter "BLOCKED" logcat line, camera never opens). This only
@@ -35,5 +42,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".bridge.QrScanActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FacturasFamilia"
+            android:screenOrientation="portrait" />
     </application>
 </manifest>

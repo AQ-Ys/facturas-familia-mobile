@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import com.facturasfamilia.app.bridge.QrScanActivity
 import dev.hotwire.core.files.util.HotwireFileProvider
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
@@ -15,6 +16,21 @@ import kotlin.concurrent.thread
 class MainActivity : HotwireActivity() {
     private var cameraOutputFile: File? = null
     private var cameraResultCallback: ((File?) -> Unit)? = null
+    private var qrScanResultCallback: ((String?) -> Unit)? = null
+
+    private val qrScanLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val callback = qrScanResultCallback
+        qrScanResultCallback = null
+
+        val value = if (result.resultCode == RESULT_OK) {
+            result.data?.getStringExtra(QrScanActivity.EXTRA_QR_VALUE)
+        } else {
+            null
+        }
+        callback?.invoke(value)
+    }
 
     // Registered at construction time (ActivityResult contracts must be
     // registered before the activity reaches STARTED — a bridge component
@@ -118,6 +134,19 @@ class MainActivity : HotwireActivity() {
             cameraResultCallback = null
             onResult(null)
         }
+    }
+
+    /**
+     * Launches the live QR scanner screen (CameraX preview + on-device ML
+     * Kit decoding, with a "pick from gallery" fallback for QRs that arrive
+     * as an existing image). Replaces the old take-a-single-photo-then-decode
+     * flow, which real-device testing showed was too unreliable — a static
+     * shutter photo rarely frames a QR cleanly on the first try, whereas a
+     * live preview lets the user adjust until it locks on.
+     */
+    fun launchQrScan(onResult: (String?) -> Unit) {
+        qrScanResultCallback = onResult
+        qrScanLauncher.launch(Intent(this, QrScanActivity::class.java))
     }
 
     private fun buildCameraIntent(onResult: (File?) -> Unit): Intent {
