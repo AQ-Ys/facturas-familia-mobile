@@ -30,7 +30,7 @@ android {
             // (e.g. http://192.168.x.x:3000); Puma already binds 0.0.0.0.
             // Cleartext HTTP for this host is allowed ONLY in this build type
             // via src/debug's network security config + manifest overlay.
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000\"")
+            buildConfigField("String", "BASE_URL", "\"http://192.168.8.166:3000\"")
         }
         release {
             // Placeholder until the production domain exists. Release builds
